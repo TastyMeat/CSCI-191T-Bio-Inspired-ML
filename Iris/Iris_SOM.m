@@ -1,16 +1,18 @@
+clear
+
 load fisheriris.mat
 
 x = meas';
 testDimensions = 2:10;
 results = zeros(length(testDimensions), 1);
 meanElementPerCluster = zeros(length(testDimensions), 1);
+nets = cell(length(testDimensions), 1);
 
 for testId = 1 : length(testDimensions)
-    %% Create a Self-Organizing Map
+    %% Create a Self-Organizing Map and Train the Network
     net = selforgmap([testDimensions(testId) testDimensions(testId)]);
-
-    %% Train the Network
     [net, ~] = train(net,x);
+    nets{testId} = net;
 
     y = net(x);
     classes = vec2ind(y)';
@@ -31,25 +33,29 @@ for testId = 1 : length(testDimensions)
         for j = 1 : length(clusterUniques)
             frequencies(j) = length(strcmp(species(elementIdsInClass), clusterUniques{j}));
         end
-        [~, id] = max(frequencies);
-        clusterLabels{i} = clusterUniques{id};
+        [~, modeId] = max(frequencies);
+        clusterLabels{i} = clusterUniques{modeId};
     end
 
+    %% Record the Test Results
     results(testId) = sum(strcmp(clusterLabels(classes), species)) / length(species);
     meanElementPerCluster(testId) = mean(elementsInClasses);
 end
+clear testId i j
+clear frequencies modeId
 
-figure
+%% Display Results
+figure("Name", 'Performance of SOM on Iris Data Set');
+
+accuracyPlot = plot(power(testDimensions, 2), results, 'xb-');
 hold on
-plot(power(testDimensions, 2), results, 'b');
-plot(power(testDimensions, 2), meanElementPerCluster / length(species), 'r');
+ElementPerClusterPlot = plot(power(testDimensions, 2), meanElementPerCluster / length(species), 'xr-');
 hold off
-
-figure, plot(power(testDimensions, 2), meanElementPerCluster ./ power(testDimensions, 2)', 'r');
-
+title('Performance of SOM on Iris Data Set');
+xlabel('Number of nodes');
+legend({'Accuracy', 'ElementPerClusterRatio'}, "Location", "east");
 
 % Plots
-% Uncomment these lines to enable various plots.
 %figure, plotsomtop(net)
 %figure, plotsomnc(net)
 %figure, plotsomnd(net)
