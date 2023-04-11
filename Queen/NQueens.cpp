@@ -87,6 +87,10 @@ public:
             }
             cout << endl;
         }
+        cout << "  ";
+        for (int x = 1; x <= board.width; x++) {
+            cout << (x) << " ";
+        }
         cout << endl;
     }
     //take solution, assign solution into table, print table with solution
@@ -159,7 +163,7 @@ const string Chessboard::dot = "·";
 const string Chessboard::queen = "♕";
 
 int main() {
-    Chessboard board(8, 8);
+    Chessboard board(5, 5);
     board.NQueens();
     cout << "Solutions: " << board.solutions.size() << endl;
     for (int i = 0; i < (int)board.solutions.size() % 5; i++)
