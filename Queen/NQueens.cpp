@@ -62,7 +62,7 @@ public:
         if (this->width < this->height) swap(this->width, this->height);
 
         for (int i = 0; i < height; i++) {
-            cout << "yay" << i << height << endl;
+            cout << "begin: " << i << "(" << width << "," << height << ")" << endl;
             PlaceQueen(Vector2(0, i), vector<vector<TileState> >(width, vector<TileState>(height, Unoccupied)), vector<Vector2>{});
         }
     }
@@ -96,18 +96,22 @@ public:
     //take solution, assign solution into table, print table with solution
 private:
     void PlaceQueen(const Vector2 position, vector<vector<TileState> > chessboard, vector<Vector2> solution) {
+        //cout << position.x() << "," << position.y();
         solution.push_back(position);
         UpdateBoardState(position, chessboard);
 
         if ((int)solution.size() == height) {
             solutions.push_back(solution);
+            //cout << " solved" << endl;
             return;
         }
+        //cout << endl;
 
-        if (position.y() + 1 < height) {
+        for (int y = 0; y < height; y++) {
+            if (y == position.y())continue;
             for (int x = 0; x < width; x++) {
-                if (chessboard[x][position.y() + 1] == Unoccupied)
-                    PlaceQueen(Vector2(x, position.y() + 1), chessboard, solution);
+                if (chessboard[x][y] == Unoccupied)
+                    PlaceQueen(Vector2(x, y), chessboard, solution);
             }
         }
     }
@@ -163,12 +167,17 @@ const string Chessboard::dot = "·";
 const string Chessboard::queen = "♕";
 
 int main() {
-    Chessboard board(5, 5);
+    Chessboard board(8, 8);
     board.NQueens();
     cout << "Solutions: " << board.solutions.size() << endl;
-    for (int i = 0; i < (int)board.solutions.size() % 5; i++)
+    for (int i = 0; i < min(6, (int)board.solutions.size()); i++)
         Chessboard::DisplaySolution(board, board.solutions[i]);
 
+    while (true) {
+        int id = 0;
+        cin >> id;
+        Chessboard::DisplaySolution(board, board.solutions[id]);
+    }
     return 0;
 }
 /*
