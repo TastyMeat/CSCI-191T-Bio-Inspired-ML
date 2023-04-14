@@ -2,6 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/wrh10/Downloads/Education/CSU Fresno/Computer Science/CSCI 191T/CSCI-191T-Bio-Inspired-ML/Queen",
+      "program": "c:/Users/wrh10/Downloads/Education/CSU Fresno/Computer Science/CSCI 191T/CSCI-191T-Bio-Inspired-ML/Queen/build/Release/outRelease",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
       "name": "C/C++: g++.exe build and debug active file",
       "type": "cppdbg",
       "request": "launch",
@@ -26,25 +45,6 @@
         }
       ],
       "preLaunchTask": "C/C++: g++.exe build active file"
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/wrh10/Downloads/Education/CSU Fresno/Computer Science/CSCI 191T/CSCI-191T-Bio-Inspired-ML/Queen",
-      "program": "c:/Users/wrh10/Downloads/Education/CSU Fresno/Computer Science/CSCI 191T/CSCI-191T-Bio-Inspired-ML/Queen/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
     }
   ]
 }

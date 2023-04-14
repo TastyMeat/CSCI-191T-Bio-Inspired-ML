@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include <windows.h>
 
 using namespace std;
 
@@ -10,134 +11,116 @@ struct Vector2 {
 public:
     float x() const { return _x; }
     float y() const { return _y; }
-    // float sqrMagnitude() const;
-    // float magnitude() const;
-    // Vector2 normalized() const;
 
     void Set(const float x, const float y) {
         _x = x;
         _y = y;
     }
 
-    // static float Dot(const Vector2&, const Vector2&);
-    // static float Distance(const Vector2&, const Vector2&);
-
     Vector2(const float x, const float y): _x(x), _y(y) {}
     Vector2(const Vector2& obj): _x(obj.x()), _y(obj.y()) {}
 
     Vector2 operator+(const Vector2& obj) const { return Vector2(x() + obj.x(), y() + obj.y()); }
     Vector2 operator-(const Vector2& obj) const { return Vector2(x() - obj.x(), y() - obj.y()); }
-    // Vector2 operator*(const float) const;
-    // Vector2 operator/(const float) const;
 
     Vector2& operator+=(const Vector2& obj) { return *this = this->operator+(obj); }
     Vector2& operator-=(const Vector2& obj) { return *this = this->operator-(obj); }
-    // Vector2& operator*=(const float);
-    // Vector2& operator/=(const float);
 
-    // bool operator==(const Vector2&) const;
-    // bool operator!=(const Vector2&) const;
+    bool operator==(const Vector2& obj) const { return this->x() == obj.x() && this->y() == obj.y(); }
+    bool operator!=(const Vector2& obj) const { return !this->operator==(obj); }
 private:
     float _x, _y;
 };
+
 class Chessboard {
 public:
-    enum TileState {
-        Unoccupied,
-        Attacked,
-        Occupied,
-    };
+    enum TileState { Unoccupied, Attacked, Occupied, };
     Chessboard(int width, int height): width(width), height(height) {
         //if (this->width < this->height) swap(this->width, this->height);
     }
     int width = 0;
     int height = 0;
-    static const string dot;
-    static const string queen;
-    const array<Vector2, 8> knightsMoves = { Vector2(1, 2), Vector2(2, 1), Vector2(2, -1), Vector2(1, -2), Vector2(-1, -2), Vector2(-2, -1), Vector2(-2, 1), Vector2(-1, 2) };
+    static const array<Vector2, 8> knightsMoves;
 
-    vector<vector<Vector2>> solutions;
-
-    void NQueens() {
+    vector<vector<Vector2>> NQueens() {
         if (this->width < this->height) swap(this->width, this->height);
 
-        for (int i = 0; i < height; i++) {
-            cout << "begin: " << i << "(" << width << "," << height << ")" << endl;
-            PlaceQueen(Vector2(0, i), vector<vector<TileState> >(width, vector<TileState>(height, Unoccupied)), vector<Vector2>{});
-        }
-    }
-
-    void NQueens_KnightsMove() {
-        if (this->width < this->height) swap(this->width, this->height);
+        vector<vector<Vector2>> solutions;
 
         for (int i = 0; i < height; i++)
-            KnightsMove(Vector2(0, i), vector<vector<TileState> >(width, vector<TileState>(height, Unoccupied)), vector<Vector2>{});
+            PlaceQueen(Vector2(0, i), vector<vector<TileState> >(width, vector<TileState>(height, Unoccupied)), vector<Vector2>{}, solutions);
+
+        return solutions;
     }
 
-    static void DisplaySolution(const Chessboard& board, const vector<Vector2>& solution) { // array or vector of Vector2
-        vector<vector<bool> > table(board.width, vector<bool>(board.height, false));
+    vector<vector<Vector2>> NQueens_KnightsMove() {
+        if (this->width < this->height) swap(this->width, this->height);
+
+        vector<vector<Vector2>> solutions;
+
+        for (int i = 0; i < height; i++)
+            KnightsMove(Vector2(0, i), vector<vector<TileState> >(width, vector<TileState>(height, Unoccupied)), vector<Vector2>{}, solutions);
+
+        return solutions;
+    }
+
+    static void DisplaySolution(const Chessboard& board, const vector<Vector2>& solution) {
+        //take solution, assign solution into table, print table with solution
+        vector<vector<bool>> table(board.width, vector<bool>(board.height, false));
         for (int i = 0; i < (int)solution.size(); i++)
             table[solution[i].x()][solution[i].y()] = true;
 
         cout << endl;
         for (int y = board.height - 1; y >= 0; y--) {
             cout << (y + 1) << " ";
-            for (int x = 0; x < board.width; x++) {
-                cout << (table[x][y] ? queen : dot) << " ";
-            }
+            for (int x = 0; x < board.width; x++) cout << (table[x][y] ? "♕" : "·") << " ";
             cout << endl;
         }
         cout << "  ";
-        for (int x = 1; x <= board.width; x++) {
-            cout << (x) << " ";
-        }
+        for (int x = 0; x < board.width; x++) cout << (char)('A' + x) << " ";
         cout << endl;
     }
-    //take solution, assign solution into table, print table with solution
+
 private:
-    void PlaceQueen(const Vector2 position, vector<vector<TileState> > chessboard, vector<Vector2> solution) {
-        //cout << position.x() << "," << position.y();
-        solution.push_back(position);
+    void PlaceQueen(const Vector2 position, vector<vector<TileState> > chessboard, vector<Vector2> currentSolution, vector<vector<Vector2>>& solutions) {
+        currentSolution.push_back(position);
         UpdateBoardState(position, chessboard);
 
-        if ((int)solution.size() == height) {
-            solutions.push_back(solution);
-            //cout << " solved" << endl;
+        if ((int)currentSolution.size() == height) {
+            solutions.push_back(currentSolution);
             return;
         }
-        //cout << endl;
 
-        for (int y = 0; y < height; y++) {
-            if (y == position.y())continue;
-            for (int x = 0; x < width; x++) {
-                if (chessboard[x][y] == Unoccupied)
-                    PlaceQueen(Vector2(x, y), chessboard, solution);
+        for (int x = position.x() + 1; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (chessboard[x][y] == Unoccupied) PlaceQueen(Vector2(x, y), chessboard, currentSolution, solutions);
             }
         }
     }
 
-    void KnightsMove(const Vector2 position, vector<vector<TileState> > chessboard, vector<Vector2> solution) {
-        solution.push_back(position);
+    void KnightsMove(const Vector2 position, vector<vector<TileState> > chessboard, vector<Vector2> currentSolution, vector<vector<Vector2>>& solutions) {
+        currentSolution.push_back(position);
         UpdateBoardState(position, chessboard);
 
-        if ((int)solution.size() == height) {
+        if ((int)currentSolution.size() == height) {
             //todo? Rotate solution
-            solutions.push_back(solution);
+            solutions.push_back(currentSolution);
             return;
         }
 
         for (int i = 0; i < (int)knightsMoves.size(); i++) {
             Vector2 nextPosition = position + knightsMoves[i];
-            //cout << nextPosition.x() << "," <<nextPosition.y()<<endl;
-            if (0 <= nextPosition.x() && nextPosition.x() < width && 0 <= nextPosition.y() && nextPosition.y() < height &&
-                chessboard[nextPosition.x()][nextPosition.y()] == Unoccupied)
-                return KnightsMove(nextPosition, chessboard, solution);
+            if (0 <= nextPosition.x() && nextPosition.x() < width && 0 <= nextPosition.y() && nextPosition.y() < height
+                && chessboard[nextPosition.x()][nextPosition.y()] == Unoccupied)
+                KnightsMove(nextPosition, chessboard, currentSolution, solutions);
         }
 
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                if (chessboard[x][y] == Unoccupied)
-                    KnightsMove(Vector2(x, y), chessboard, solution);
+        for (int x = position.x() - 1; x >= 0; x -= 2) {
+            for (int y = 0; x >= 0 && y < height; y++)
+                if (chessboard[x][y] == Unoccupied) KnightsMove(Vector2(x, y), chessboard, currentSolution, solutions);
+        }
+        //for (int x = position.x() + 1, y = 0; x < width && y < height; y++)
+            //if (chessboard[x][y] == Unoccupied) KnightsMove(Vector2(x, y), chessboard, currentSolution, solutions);
     }
     void UpdateBoardState(const Vector2& position, vector<vector<TileState> >& chessboard) {
         chessboard[position.x()][position.y()] = Occupied;
@@ -163,20 +146,27 @@ private:
         }
     }
 };
-const string Chessboard::dot = "·";
-const string Chessboard::queen = "♕";
+const array<Vector2, 8> Chessboard::knightsMoves = { Vector2(1, 2), Vector2(2, 1), Vector2(2, -1), Vector2(1, -2), Vector2(-1, -2), Vector2(-2, -1), Vector2(-2, 1), Vector2(-1, 2) };
 
 int main() {
+    // To display unicode
+    SetConsoleOutputCP(CP_UTF8);
+    setvbuf(stdout, nullptr, _IOFBF, 1000);
+
     Chessboard board(8, 8);
-    board.NQueens();
-    cout << "Solutions: " << board.solutions.size() << endl;
-    for (int i = 0; i < min(6, (int)board.solutions.size()); i++)
-        Chessboard::DisplaySolution(board, board.solutions[i]);
+    auto solution = board.NQueens();
 
     while (true) {
-        int id = 0;
+        static int id = 0;
+        cout << endl;
+        cout << "Solutions Found: " << solution.size() << endl;
+        cout << "Showing solution: " << id << endl;
+        Chessboard::DisplaySolution(board, solution[id]);
+
+        cout << "Enter next solution: ";
         cin >> id;
-        Chessboard::DisplaySolution(board, board.solutions[id]);
+
+        if(id >= solution.size()) break;
     }
     return 0;
 }
