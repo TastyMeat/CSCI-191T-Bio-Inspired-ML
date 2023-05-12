@@ -3,14 +3,18 @@ clear
 load fisheriris.mat
 
 x = meas';
-testDimensions = 2:10;
-results = zeros(length(testDimensions), 1);
-meanElementPerNode = zeros(length(testDimensions), 1);
-nets = cell(length(testDimensions), 1);
+testDimensionsX = 2:10;
+%testDimensionsY = 2:10;
+%testDimensionsX = zeros(length(testDimensionsY), 1)' + 3;
+testDimensionsY = zeros(length(testDimensionsX), 1)' + 3;
 
-for testId = 1 : length(testDimensions)
+results = zeros(length(testDimensionsX), 1);
+meanElementPerNode = zeros(length(testDimensionsX), 1);
+nets = cell(length(testDimensionsX), 1);
+
+for testId = 1 : length(testDimensionsX)
     %% Create a Self-Organizing Map and Train the Network
-    net = selforgmap([testDimensions(testId) testDimensions(testId)]);
+    net = selforgmap([testDimensionsX(testId) testDimensionsY(testId)]);
     [net, ~] = train(net,x);
     nets{testId} = net;
 
@@ -18,9 +22,9 @@ for testId = 1 : length(testDimensions)
     classes = vec2ind(y)';
 
     %% Test the Network
-    nodeLabels = cell(power(testDimensions(testId), 2), 1);
-    elementsInClasses = zeros(power(testDimensions(testId), 2), 1);
-    for i = 1 : power(testDimensions(testId), 2)
+    nodeLabels = cell(testDimensionsX(testId) * testDimensionsY(testId), 1);
+    elementsInClasses = zeros(testDimensionsX(testId) * testDimensionsY(testId), 1);
+    for i = 1 : testDimensionsX(testId) * testDimensionsY(testId)
         elementIdsInClass = find(classes == i);
         elementsInClasses(i) = length(elementIdsInClass);
         if isempty(elementIdsInClass)
@@ -47,9 +51,9 @@ clear frequencies modeId
 %% Display Results
 figure("Name", 'Performance of SOM on Iris Data Set');
 
-accuracyPlot = plot(power(testDimensions, 2), results, 'xb-');
+accuracyPlot = plot(testDimensionsX .* testDimensionsY, results, 'xb-');
 hold on
-ElementPerNodePlot = plot(power(testDimensions, 2), meanElementPerNode / length(species), 'xr-');
+ElementPerNodePlot = plot(testDimensionsX .* testDimensionsY, meanElementPerNode / length(species), 'xr-');
 hold off
 title('Performance of SOM on Iris Data Set');
 xlabel('Number of nodes');

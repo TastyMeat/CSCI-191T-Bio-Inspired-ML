@@ -154,11 +154,12 @@ int main() {
     setvbuf(stdout, nullptr, _IOFBF, 1000);
 
     Chessboard board(8, 8);
-    auto solution = board.NQueens();
+    auto solution = board.NQueens_KnightsMove();
 
     while (true) {
         static int id = 0;
         cout << endl;
+        cout << "Board: " << board.width << " x " << board.height << endl;
         cout << "Solutions Found: " << solution.size() << endl;
         cout << "Showing solution: " << id << endl;
         Chessboard::DisplaySolution(board, solution[id]);
@@ -166,7 +167,7 @@ int main() {
         cout << "Enter next solution: ";
         cin >> id;
 
-        if(id >= solution.size()) break;
+        if (id >= solution.size()) break;
     }
     return 0;
 }
